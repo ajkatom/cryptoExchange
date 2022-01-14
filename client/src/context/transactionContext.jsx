@@ -9,22 +9,21 @@ const { ethereum } = window;
 
 const getEthereumContract = () => {
   const provider = new ethers.providers.Web3Provider(ethereum);
-  const signer = provider.getigner();
+  const signer = provider.getSigner();
   const TransactionContract = new ethers.Contract(contractAddress, contractABI, signer);
-  console.log({
-    provider,
-    signer,
-    TransactionContract,
-  });
+  return TransactionContract;
 };
 
 export const TransactionProvider = ({ children }) => {
   const [currentAccount, setCurrentAccount] = useState('');
   const [formData, setFormData] = useState({ addressTo: '', amount: '', keyword: '', message: '' });
+  const [isLoaing, setIsLoading] = useState(false);
+  const [transactionCount, setTransactionCount] = useState(
+    localStorage.getItem('transactionCount')
+  );
 
   const handleChange = (e, name) => {
     setFormData((prevState) => ({ ...prevState, [name]: e.target.value }));
-    console.log(prevState);
   };
 
   const checkWalletConnection = async () => {
@@ -58,6 +57,38 @@ export const TransactionProvider = ({ children }) => {
   const sendTransaction = async () => {
     try {
       if (!ethereum) return alert('metamask not installed please install to contiue');
+      const { addressTo, amount, keyword, message } = formData;
+      const transactionContract = getEthereumContract();
+      const hexAmount = ethers.utils.parseEther(amount);
+
+      const transactionParams = {
+        gas: '0x5208',
+        from: currentAccount,
+        to: addressTo,
+        value: hexAmount._hex,
+      };
+
+      await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParams],
+      });
+
+      const transactionHash = await transactionContract.addToBlockchain(
+        addressTo,
+        hexAmount,
+        message,
+        keyword
+      );
+
+      setIsLoading(true);
+      console.log(`Loading: ${transactionHash.hash}`);
+      await transactionHash.wait();
+      setIsLoading(false);
+      console.log(`loaded: ${transactionHash.hash}`);
+
+      const transactionCount = await transactionContract.getTransactionCount;
+
+      setTransactionCount(Number(transactionCount));
     } catch (error) {
       console.error(error);
     }
