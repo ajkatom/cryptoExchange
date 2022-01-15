@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Footer, Home, NavBar, Services, Transactions, Loader } from './components';
 
 const App = () => {

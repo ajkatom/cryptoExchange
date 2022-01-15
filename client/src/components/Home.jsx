@@ -5,9 +5,10 @@ import { BsInfoCircle } from 'react-icons/bs';
 
 import Loader from './Loader';
 import { TransactionContext } from '../context/transactionContext';
+import { shortenedAddress } from '../utils/shortenedAddress';
 
 const commonStyles =
-  'min-h[70px] sm:px-0 px2 sm:min-w-[120px] flex justify-center items-center border-[0.5px] border-gray-400 text-sm font-light text-white';
+  'min-h[70px] sm:px-0 p-4 sm:min-w-[120px] flex justify-center items-center border-[0.5px] border-gray-400 text-sm font-light text-white';
 
 const Input = ({ placeholder, name, type, value, handleChange }) => (
   <input
@@ -24,9 +25,9 @@ const Home = () => {
   const { connectWallet, currentAccount, formData, sendTransaction, handleChange } = useContext(
     TransactionContext
   );
+  const abrivatedAddress = shortenedAddress(currentAccount);
   const handleSubmit = (e) => {
     const { addressTo, amount, keyword, message } = formData;
-
     e.preventDefault();
     if (!addressTo || !amount || !keyword || !message) return;
 
@@ -54,10 +55,10 @@ const Home = () => {
           )}
           <div className="grid sm:grid-cols-3 grid-cols-2 w-full mt-10">
             <div className={`rounded-tl-2xl ${commonStyles}`}>Reliability</div>
-            <div className={commonStyles}>Security</div>
-            <div className={`rounded-tr-2xl ${commonStyles}`}>Ethereum</div>
-            <div className={`rounded-bl-2xl ${commonStyles}`}>Web 3.0</div>
-            <div className={commonStyles}>Low Fees</div>
+            <div className={`rounded-tr-2xl md:rounded-none ${commonStyles}`}>Security</div>
+            <div className={`md:rounded-tr-2xl ${commonStyles}`}>Ethereum</div>
+            <div className={`md:rounded-bl-2xl ${commonStyles}`}>Web 3.0</div>
+            <div className={`rounded-bl-2xl md:rounded-none ${commonStyles}`}>Low Fees</div>
             <div className={`rounded-br-2xl ${commonStyles}`}>Blockchain</div>
           </div>
         </div>
@@ -72,7 +73,11 @@ const Home = () => {
               </div>
             </div>
             <div>
-              <p className="text-black font-light text-[11px]">{currentAccount}</p>
+              {currentAccount ? (
+                <p className="text-black font-light text-[11px]">{abrivatedAddress}</p>
+              ) : (
+                <p className="text-black font-light text-[11px]">Address</p>
+              )}
               <p className="text-white font-semibold text-lg mt-1 ">Ethereum</p>
             </div>
           </div>
